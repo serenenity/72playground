@@ -6,6 +6,10 @@ class Scratch3YourExtension {
 
     constructor (runtime) {
         // put any setup for your extension here
+        import('syllable')
+        .then((syllableModule) => {
+        this.syllable = syllableModule.syllable;
+        });
     }
 
     /**
@@ -17,11 +21,11 @@ class Scratch3YourExtension {
             id: 'yourScratchExtension',
 
             // name that will be displayed in the Scratch UI
-            name: 'Demo',
+            name: 'cp72-Demo',
 
             // colours to use for your extension blocks
-            color1: '#000099',
-            color2: '#660066',
+            color1: '#a5c882',
+            color2: '#f7dd72',
 
             // icons to display
             blockIconURI: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAkAAAAFCAAAAACyOJm3AAAAFklEQVQYV2P4DwMMEMgAI/+DEUIMBgAEWB7i7uidhAAAAABJRU5ErkJggg==',
@@ -81,6 +85,26 @@ class Scratch3YourExtension {
                             type: ArgumentType.STRING
                         }
                     }
+                },
+                {
+                    // function where your code logic lives
+                    opcode: 'mySecondBlock',
+            
+                    // type of block
+                    blockType: BlockType.REPORTER,
+            
+                    // label to display on the block
+                    text: 'Syllables in [MY_TEXT]',
+            
+                    // arguments used in the block
+                    arguments: {
+                      MY_TEXT: {
+                        defaultValue: 'Hello World',
+            
+                        // type/shape of the parameter
+                        type: ArgumentType.STRING
+                      }
+                    }
                 }
             ]
         };
@@ -91,10 +115,24 @@ class Scratch3YourExtension {
      * implementation of the block with the opcode that matches this name
      *  this will be called when the block is used
      */
-    myFirstBlock ({ MY_NUMBER, MY_STRING }) {
-        // example implementation to return a string
-        return MY_STRING + ' : doubled would be ' + (MY_NUMBER * 2);
-    }
+    myFirstBlock ({ BOOK_NUMBER }) {
+        return fetch('https://openlibrary.org/isbn/' + BOOK_NUMBER + '.json')
+          .then((response) => {
+            if (response.ok) {
+              return response.json();
+            }
+            else {
+              return { title: 'Unknown' };
+            }
+          })
+          .then((bookinfo) => {
+            return bookinfo.title;
+          });
+      }
+
+      mySecondBlock ({ MY_TEXT }) {
+        return this.syllable(MY_TEXT);
+      }
 }
 
 module.exports = Scratch3YourExtension;
